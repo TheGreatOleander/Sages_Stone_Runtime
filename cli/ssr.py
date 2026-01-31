@@ -1,8 +1,3 @@
-# Runtime — Patch File: cli/ssr.py
-#
-# Expose full runtime limits + surface step usage cleanly
-#
-
 #!/usr/bin/env python3
 
 import argparse
@@ -19,9 +14,7 @@ except ImportError:
 from runner.run import run
 from runner.limits import Limits
 from runner.errors import LimitExceeded, ExecutionFailed
-
-# ---- core entry point ----
-from sages_stone import run_model
+from runner.entry_adapter import adapter_entry
 
 
 EXIT_SUCCESS = 0
@@ -35,7 +28,7 @@ def load_config(path: Path) -> dict:
 
     if path.suffix in (".yaml", ".yml"):
         if not HAS_YAML:
-            raise RuntimeError("PyYAML not installed")
+            raise RuntimeError("PyYAML not installed, cannot read YAML config")
         with path.open("r") as f:
             return yaml.safe_load(f)
 
@@ -58,9 +51,11 @@ def main():
     run_cmd.add_argument("config", help="Path to config (.json or .yaml)")
     run_cmd.add_argument("--max-steps", type=int, default=1_000)
     run_cmd.add_argument("--max-seconds", type=float, default=5.0)
-    run_cmd.add_argument("--max-memory-mb", type=int, default=256)
 
     args = parser.parse_args()
+
+    if args.command != "run":
+        parser.error("Unknown command")
 
     try:
         config = load_config(Path(args.config))
@@ -68,16 +63,15 @@ def main():
         limits = Limits(
             max_steps=args.max_steps,
             max_seconds=args.max_seconds,
-            max_memory_mb=args.max_memory_mb,
         )
 
         result = run(
             config=config,
             limits=limits,
-            entry_fn=run_model,
+            entry_fn=adapter_entry,
         )
 
-        print(json.dumps(result, indent=2))
+        print(json.dumps(result, indent=2, default=str))
         sys.exit(EXIT_SUCCESS)
 
     except LimitExceeded as e:

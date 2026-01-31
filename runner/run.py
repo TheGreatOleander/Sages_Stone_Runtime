@@ -1,117 +1,67 @@
-# Runtime — Patch File: runner/run.py
-#
-# Inject runtime info + enforce core compatibility
-#
+"""
+Controlled execution runner.
 
-import multiprocessing as mp
+Responsibilities:
+- Validate config early
+- Enforce limits
+- Execute entry_fn safely
+- Return structured result
+"""
+
 import time
 import traceback
+from typing import Any, Callable, Dict
 
-from runner.errors import LimitExceeded, ExecutionFailed
 from runner.limits import Limits
-from runner.core_adapter import adapt_entry
-from runner.memory import set_memory_limit_mb
-from runner.result_schema import build_result
-from runner.signals import install_signal_handlers
-from runner.trace import Trace
-from runner.sanitize import sanitize_config
-from runner.capabilities import get_capabilities
-from runner.version import get_runtime_info
-from runner.compat import check_compat
+from runner.errors import LimitExceeded, ExecutionFailed
+from runner.config_schema import validate_config
 
 
-def _worker(entry_fn, config, queue, step_counter, max_memory_mb, trace):
+def run(
+    *,
+    config: Dict[str, Any],
+    limits: Limits,
+    entry_fn: Callable[[Dict[str, Any]], Any],
+) -> Dict[str, Any]:
+    """
+    Main runtime execution wrapper.
+    """
+
+    started = time.time()
+    steps = 0
+
+    def step():
+        nonlocal steps
+        steps += 1
+        if limits.max_steps is not None and steps > limits.max_steps:
+            raise LimitExceeded(f"Step limit exceeded ({limits.max_steps})")
+
+        if limits.max_seconds is not None:
+            if (time.time() - started) > limits.max_seconds:
+                raise LimitExceeded(
+                    f"Time limit exceeded ({limits.max_seconds}s)"
+                )
+
     try:
-        install_signal_handlers()
-        set_memory_limit_mb(max_memory_mb)
+        cfg = validate_config(config)
 
-        safe_entry = adapt_entry(entry_fn)
+        step()  # pre-exec step charge
 
-        config = sanitize_config(config)
+        result = entry_fn(cfg)
 
-        runtime_info = get_runtime_info()
-        core_requires = config.get("_core_requires")
+        step()  # post-exec step charge
 
-        check_compat(runtime_info, core_requires)
-
-        config["_steps"] = step_counter
-        config["_trace"] = trace
-        config["_runtime"] = {
-            "info": runtime_info,
-            "capabilities": get_capabilities(),
+        return {
+            "status": "ok",
+            "result": result,
+            "steps": steps,
+            "elapsed": time.time() - started,
         }
 
-        trace.emit("runtime.start", runtime=runtime_info)
-
-        result = safe_entry(config)
-
-        trace.emit("runtime.finish")
-
-        queue.put({
-            "ok": True,
-            "result": result,
-            "steps_used": step_counter.value,
-            "trace": trace.dump(),
-        })
+    except LimitExceeded:
+        raise
 
     except Exception as e:
-        queue.put({
-            "ok": False,
-            "error": str(e),
-            "traceback": traceback.format_exc(),
-        })
-
-
-def run(config: dict, limits: Limits, entry_fn):
-    start_time = time.time()
-    limits.validate(config)
-
-    queue = mp.Queue()
-    step_counter = limits.make_step_counter()
-    trace = Trace()
-
-    proc = mp.Process(
-        target=_worker,
-        args=(
-            entry_fn,
-            config,
-            queue,
-            step_counter,
-            limits.max_memory_mb,
-            trace,
-        ),
-        daemon=True,
-    )
-
-    proc.start()
-    proc.join(timeout=limits.max_seconds)
-
-    if proc.is_alive():
-        proc.terminate()
-        proc.join()
-        raise LimitExceeded("Execution time limit exceeded")
-
-    if queue.empty():
-        if proc.exitcode not in (0, None):
-            raise ExecutionFailed(
-                f"Worker exited with code {proc.exitcode}"
-            )
-        raise ExecutionFailed("Execution finished without result payload")
-
-    payload = queue.get(timeout=0.5)
-    elapsed = time.time() - start_time
-
-    if not payload.get("ok"):
-        raise ExecutionFailed(payload.get("error", "Unknown worker error"))
-
-    result = build_result(
-        status="success",
-        elapsed_seconds=round(elapsed, 4),
-        steps_used=payload.get("steps_used", 0),
-        result=payload["result"],
-    )
-
-    if "trace" in payload:
-        result["trace"] = payload["trace"]
-
-    return result
+        raise ExecutionFailed(
+            f"{e}\n{traceback.format_exc()}"
+        ) from e
