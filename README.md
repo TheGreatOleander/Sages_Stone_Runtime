@@ -146,36 +146,35 @@ Other Linux distributions may work, but are not guaranteed.
 
 ### Dependencies
 
-You need only what the runtime explicitly depends on.
-Do **not** add tooling "just in case".
+This runtime intentionally declares **no external Python dependencies**.
 
-At minimum:
+If you are looking for a `requirements.txt` or `pyproject.toml`, their absence is deliberate.
+
+At minimum, you need:
 
 * Python 3.10 or newer
-* `pip`
-* Standard build tools (`build-essential`)
+* Standard system build tools (for Python itself)
 
-Install system dependencies:
+Install system prerequisites:
 
 ```bash
 sudo apt update
-sudo apt install -y python3 python3-pip build-essential
+sudo apt install -y python3 build-essential
 ```
 
-If additional dependencies are required, they are declared in the repository and nowhere else.
+If the runtime ever gains external dependencies, they will be explicit, minimal, and justified.
 
 ---
 
 ### Setup
 
-From the repository root:
+There is no installation step beyond cloning the repository.
 
-```bash
-pip install -r requirements.txt
-```
+Do **not** invent dependency files.
+Do **not** add package managers.
+Do **not** wrap the runtime for convenience.
 
-No virtual environment is required, though you may use one.
-The runtime does not care.
+If your system Python cannot execute the runtime as-is, that is a valid failure signal.
 
 ---
 
