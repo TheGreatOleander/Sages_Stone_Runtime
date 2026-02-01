@@ -1,0 +1,31 @@
+"""
+Runtime Lifecycle Hooks
+======================
+
+Defines a minimal observer interface for reacting to runtime lifecycle
+transitions.
+
+This is intentionally:
+- Optional
+- Decoupled
+- Side-effect safe
+
+Nothing here controls execution.
+Everything here *observes* it.
+"""
+
+from typing import Protocol
+
+from .lifecycle import RuntimeState
+
+
+class RuntimeLifecycleHook(Protocol):
+    """
+    Protocol for observing runtime lifecycle changes.
+    """
+
+    def on_transition(self, state: RuntimeState) -> None:
+        """
+        Called whenever the runtime transitions to a new state.
+        """
+        ...

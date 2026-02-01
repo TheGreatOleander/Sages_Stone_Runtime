@@ -1,0 +1,58 @@
+"""
+Runtime Driver
+==============
+
+High-level coordinator responsible for constructing and running a
+RuntimeEngine with appropriate hooks and adapters.
+"""
+
+from typing import Any, Dict, Optional
+
+from Sages_Stone_Runtime.runtime_engine.runtime_engine import RuntimeEngine
+from Sages_Stone_Runtime.runtime_engine.hooks.tracing import RuntimeTraceHook
+
+
+class RuntimeDriver:
+    """
+    Primary runtime entry point.
+
+    The driver is responsible for:
+    - Engine construction
+    - Hook attachment
+    - Executing the runtime
+    - Returning results
+    """
+
+    def __init__(self, *, metadata: Optional[Dict[str, Any]] = None):
+        self.metadata = metadata or {}
+
+    def run(self, **kwargs) -> Any:
+        """
+        Build and execute a runtime instance.
+        """
+
+        # --------------------------------------------------------------
+        # Engine construction
+        # --------------------------------------------------------------
+        engine = RuntimeEngine(metadata=self.metadata)
+
+        # --------------------------------------------------------------
+        # Default hooks
+        # --------------------------------------------------------------
+        trace_hook = RuntimeTraceHook()
+        engine.add_hook(trace_hook)
+
+        # --------------------------------------------------------------
+        # Execution flow (unchanged)
+        # --------------------------------------------------------------
+        engine.configure(**kwargs)
+        engine.prime()
+        result = engine.execute()
+
+        # --------------------------------------------------------------
+        # Attach trace if result supports it
+        # --------------------------------------------------------------
+        if hasattr(result, "metadata") and isinstance(result.metadata, dict):
+            result.metadata.setdefault("runtime_trace", trace_hook.export())
+
+        return result
