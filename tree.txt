@@ -1,0 +1,107 @@
+.
+├── CONTRACT.md
+├── LICENSE
+├── README.md
+├── RUNTIME_INVARIANTS.md
+├── __init__.py
+├── __main__.py
+├── __pycache__
+│   └── cli.cpython-312.pyc
+├── artifacts
+├── cli
+│   └── ssr.py
+├── cli.py
+├── collapse_oracle.py
+├── constraints
+│   ├── base_constraints.py
+│   └── invariant_constraints.py
+├── core
+│   ├── action_router.py
+│   ├── coherence_observer.py
+│   ├── information_lens.py
+│   ├── kernel.py
+│   ├── lens_base.py
+│   ├── observer_base.py
+│   ├── orchestator.py
+│   ├── rcf_bridge.py
+│   ├── runtime.py
+│   ├── seed_loader.py
+│   ├── state_model.py
+│   └── thermodynamic_lens.py
+├── demo_minimal.py
+├── dream.py
+├── dream_adapter.py
+├── dreams
+│   └── basic_dreams.py
+├── evolution.py
+├── examples
+│   └── basic_runs.py
+├── guarded_driver.py
+├── lens_binding.py
+├── lenses
+│   └── state_lenses.py
+├── null_runner.py
+├── observers
+│   ├── base_observer.py
+│   ├── json_trace_observer.py
+│   └── trace_observer.py
+├── runner
+│   ├── adapter.py
+│   ├── capabilities.py
+│   ├── compat.py
+│   ├── config_schema.py
+│   ├── core_adapter.py
+│   ├── entry_adapter.py
+│   ├── errors.py
+│   ├── limits.py
+│   ├── memory.py
+│   ├── result_schema.py
+│   ├── result_types.py
+│   ├── run.py
+│   ├── runtime_runner.py
+│   ├── sanitize.py
+│   ├── signals.py
+│   ├── steps.py
+│   ├── stone_adapter.py
+│   ├── trace.py
+│   └── version.py
+├── runner.py
+├── runtime.py
+├── runtime_cli.py
+├── runtime_contract.py
+├── runtime_contracts.py
+├── runtime_driver
+│   └── runtime_driver.py 
+├── runtime_driver.py
+├── runtime_engine
+│   ├── extension_contract_guard.py
+│   ├── extension_registry.py
+│   ├── extensions
+│   │   ├── bridge_trace.py
+│   │   ├── phase_logger.py
+│   │   └── phase_timing.py
+│   ├── hooks
+│   │   └── tracing.py
+│   ├── lifecycle.py
+│   ├── lifecycle_hooks.py 
+│   ├── runtime_engine.py
+│   └── scheduler.py
+├── runtime_result
+│   └── runtime_result.py
+├── runtime_result.py
+├── runtime_runner.py
+├── runtime_trace.py
+├── runtime_version.py
+├── scheduler.py
+├── scoring.py
+├── stone_interface.md
+├── tests
+│   ├── mock_stone.py
+│   └── test_stone_interface.py
+├── trace_recorder.py
+├── trace_replay.py
+├── trace_scope.py
+├── trace_store.py
+└── tree.txt
+
+17 directories, 88 files
