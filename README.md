@@ -1,5 +1,7 @@
 # Stone Runtime
 
+[![Support with Crypto](https://img.shields.io/badge/Support-Crypto%20Tip-5A31F4?logo=ethereum&logoColor=white)](https://github.com/TheGreatOleander/Sages_Stone_Runtime#support)
+
 This repository is the **runtime**.
 
 It is the execution layer that enforces law. Nothing here exists to explain ideas, complete theories, or make systems comfortable. It exists to **run them**, constrain them, collapse them, and record what happened.
@@ -208,3 +210,17 @@ If you are expecting visible output without collapse, you are upstream.
 This runtime is foundational.
 
 Everything else builds **on top of it**, never inside it, unless explicitly authorized.
+
+---
+
+## Support
+
+If Stone Runtime helped you enforce constraint with finality, you can support its continued development with a small on-chain tip.
+
+### 💰 Crypto (MetaMask compatible)
+**Ethereum / EVM address:**  
+`0x185325db018e6ecbb92bf0443abfbbb3a07ce713`
+
+*Low-fee EVM networks (Polygon, etc.) are welcome.*
+
+Thank you for accepting the verdict. ⚖️
